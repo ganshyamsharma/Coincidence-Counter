@@ -1,36 +1,36 @@
 `timescale 1us/1ns
 
 module NWCC(
-    input clk_1mhz, pulse_ip, reset_ip,
-    output [12:0] ra_count_op, a_count_op, total_count_op
+    input i_clk_1mhz, i_pulse_signal, i_reset,
+    output [12:0] o_r_plus_a_count, o_a_count, o_total_count
 );
-    wire [12:0] CNT1, CNT2, SUB, ADD1, ADD2;
-    wire a, b, c;                                                   //a--->8us delay    b--->128us delay   c--->1024us delay
+    wire [12:0] w_cnt1, w_cnt2, w_sub, w_add1, w_add2;
+    wire w_a, w_b, w_c;                                                   		//a-->8us delay    b-->128us delay   c-->1024us delay
     
-    assign total_count_op = CNT1; 
+    assign o_total_count = w_cnt1; 
      
-    delay8 d1(clk_1mhz, reset_ip, pulse_ip, a);
-    delay128 d2(clk_1mhz, reset_ip, a, b);
-    delay1024 d3(clk_1mhz, reset_ip, pulse_ip, c);
+    delay8 d1(i_clk_1mhz, i_reset, i_pulse_signal, w_a);
+    delay128 d2(i_clk_1mhz, i_reset, w_a, w_b);
+    delay1024 d3(i_clk_1mhz, i_reset, i_pulse_signal, w_c);
          
-    counter_13bit c1(a, reset_ip, CNT1);
-    counter_13bit c2(b, reset_ip, CNT2);
-    subtractor_13bit sub1(CNT1, CNT2, SUB);
-    adder_13bit add1(SUB, ra_count_op, ADD1);                     // R+A adder
-    adder_13bit add2(SUB, a_count_op, ADD2);                      // A adder
-    register_13bit reg1(pulse_ip, reset_ip, ADD1, ra_count_op);      // R+A register
-    register_13bit reg2(c, reset_ip, ADD2, a_count_op);  			//A register   
+    counter_13bit c1(w_a, i_reset, w_cnt1);
+    counter_13bit c2(w_b, i_reset, w_cnt2);
+    w_subtractor_13bit w_sub1(w_cnt1, w_cnt2, w_sub);
+    adder_13bit w_add1(w_sub, o_r_plus_a_count, w_add1);                     	// R+A adder
+    adder_13bit w_add2(w_sub, o_a_count, w_add2);                      			// A adder
+    register_13bit reg1(i_pulse_signal, i_reset, w_add1, o_r_plus_a_count);     // R+A register
+    register_13bit reg2(w_c, i_reset, w_add2, o_a_count);  						//A register   
 	
 endmodule
 
-///////////////////////////////////////////////////////////// Counter Unit
+////////////////////////////////////////////////////////////// Counter Unit
 
 module counter_13bit(
-    input clk, reset_ip,
+    input clk, reset,
     output reg [12:0] count
 );
-    always @(posedge clk, posedge reset_ip) begin
-    if (reset_ip)
+    always @(posedge clk, posedge reset) begin
+    if (reset)
         count <= 13'd0;
     else
         count <= count + 1'b1;
@@ -39,14 +39,15 @@ endmodule
 
 ///////////////////////////////////////////////////////////// Subtractor Unit
 
-module subtractor_13bit(
+module w_subtractor_13bit(
     input [12:0] num1, num2,
     output [12:0] result
 );
     assign result = num1 - num2;   
 endmodule
 
-//////////////////////////////////////////////////////////// Adder Unit
+///////////////////////////////////////////////////////////// Adder Unit
+
 module adder_13bit(
     input [12:0] num1, num2,
     output [12:0] result
@@ -57,12 +58,12 @@ endmodule
 //////////////////////////////////////////////////////////// Register Unit
 
 module register_13bit(
-    input clk, reset_ip,
+    input clk, reset,
     input [12:0] inp,
     output reg [12:0] out
 );
-    always @(posedge clk or posedge reset_ip) begin
-        if(reset_ip)
+    always @(posedge clk or posedge reset) begin
+        if(reset)
             out <= 13'd0;
         else
             out <= inp;
@@ -73,41 +74,41 @@ endmodule
 
 //////////////////// 8us delay
 module delay8 (
-input clk, reset_ip, inp, 
+input clk, reset, inp, 
 output out
 );
     reg [7:0] shifter;
     assign out = shifter[7];
-    always @(posedge clk or posedge reset_ip) begin
-        if(reset_ip)
+    always @(posedge clk or posedge reset) begin
+        if(reset)
             shifter <= 8'd0;
         else
             shifter <= {shifter[6:0], inp};
     end
 endmodule       
-/////////////////// 128us delay //////////////////
+/////////////////// 128us delay 
 module delay128 (
-input clk, reset_ip, inp, 
+input clk, reset, inp, 
 output out
 );
     reg [127:0] shifter;
     assign out = shifter[127];
-    always @(posedge clk or posedge reset_ip) begin
-        if(reset_ip)
+    always @(posedge clk or posedge reset) begin
+        if(reset)
             shifter <= 128'd0;
         else
             shifter <= {shifter[126:0], inp};
     end
 endmodule                   
-///////////////// 1024us delay //////////////////
+///////////////// 1024us delay 
 module delay1024 (
-input clk, reset_ip, inp, 
+input clk, reset, inp, 
 output out
 );
     reg [1023:0] shifter;
     assign out = shifter[1023];
-    always @(posedge clk or posedge reset_ip) begin
-        if(reset_ip)
+    always @(posedge clk or posedge reset) begin
+        if(reset)
             shifter <= 1024'd0;
         else
             shifter <= {shifter[1022:0], inp};
