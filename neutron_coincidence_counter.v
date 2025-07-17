@@ -5,7 +5,7 @@ module nwcc #(parameter DATA_BITS = 24)
     );
     
     wire [DATA_BITS-1 : 0] w_cnt1, w_cnt2, w_sub, w_add1, w_add2;
-    wire w_a, w_b, w_c;                                                   	//a-->8us delay    b-->128us delay   c-->1024us delay
+    wire w_a, w_b, w_c;                                                   	//a-->8us delay (predealy)    b-->128us delay (gate interval)   c-->1024us delay (long delay)
     
     assign o_total_count = w_cnt1; 
      
@@ -19,7 +19,7 @@ module nwcc #(parameter DATA_BITS = 24)
     adder add1(w_sub, o_r_plus_a_count, w_add1);                     		// R+A adder
     adder add2(w_sub, o_a_count, w_add2);                      				// A adder
     register reg1(i_pulse_signal, i_reset, w_add1, o_r_plus_a_count);     	// R+A register
-    register reg2(w_c, i_reset, w_add2, o_a_count);  						//A register   
+    register reg2(w_c, i_reset, w_add2, o_a_count);  						// A register   
 	
 endmodule
 //
