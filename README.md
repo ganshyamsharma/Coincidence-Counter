@@ -1,5 +1,5 @@
 # Neutron Coincidence Counter
-Some radioactive fissile materials undergo spontaneous fission reactions causing them to release one or more neutrons spontaneously per reaction. 
+Some radioactive materials undergo spontaneous fission reactions causing them to release one or more neutrons spontaneously per reaction. 
 Knowing the number of these coincidence neutron events, quantitative estimation of radioactive material can be performed non-destructively and safely.
 Neutron detectors are used to give electrical pulse signals for each neutron detected. However, gross counting of neutrons do not provide the exact representation of
 coincidence neutrons emitted spontaneously due to fission reactions as there are background neutrons and coincidence events can also be wrongly accounted due to
